@@ -37,8 +37,10 @@ class Geolocation extends Component {
 
       this.watchID = navigator.geolocation.watchPosition((lastPosition) => {
         console.log(lastPosition);
-        this.setState({latitude: lastPosition.coords.latitude});
-        this.setState({latitude: lastPosition.coords.latitude});
+        this.setState({
+          latitude: lastPosition.coords.latitude,
+          longitude: lastPosition.coords.longitude
+        });
 
         var newRegion = {
             latitude: lastPosition.coords.latitude,
