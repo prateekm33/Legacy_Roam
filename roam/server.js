@@ -100,6 +100,7 @@ app.post('/signin', function(req, res){
 
 //Page to set up event between users, making API calls to YELP
 app.post('/roam', function(req, res) {
+  console.log(JSON.stringify(req.body));
 
 	var dateMS = Date.now();
   var userEmail = req.body.userEmail;
@@ -220,6 +221,33 @@ app.post('/cancel', function(req, res){
 
     res.send("Your Roam has been canceled"); 
   });
+});
+
+//Simplified version of what db query will return
+var DUMMYDATA = {
+  roam: {
+    location: 'A location'
+  },
+  people: [
+    {name: 'A person'}
+  ]
+};
+
+//Check for recently completed roams
+app.get('/finished', function(req, rep){
+
+});
+
+//Save roam ratings from user
+app.post('/finished', function(req, rep){
+  
+});
+
+//Get all completed, rated roams for user
+app.get('/history', function(req, rep){
+  //JUST SEND DUMMY DATA FOR NOW
+  //if there are 
+  res.send();
 });
 
 app.listen(3000, function(){
