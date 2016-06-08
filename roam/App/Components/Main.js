@@ -89,6 +89,7 @@ class Main extends Component {
         }
       })
       .catch((error) => {
+        //expand error handling to UI?
         console.log('Error handling submit:', error);
       });
     }
@@ -115,22 +116,20 @@ class Main extends Component {
       <Image style={styles.backgroundImage}
       source={require('../../imgs/uni.jpg')}>
         <Text style={styles.title}> roam </Text>
-        {/* Fields that we want to bind the email and password input */}
+        {/* Fields that we want to bind the email and password input to */}
         <TextInput
           style={styles.submit}
           placeholder="Email"
           placeholderTextColor="white"
           value={this.state.email}
-          onChange={this.handleEmail.bind(this)}
-          />
+          onChange={this.handleEmail.bind(this)}/>
         <TextInput
           style={styles.submit}
           placeholder="Password"
           placeholderTextColor="white"
           value={this.state.password}
           onChange={this.handlePassword.bind(this)}
-          secureTextEntry={true}
-        />
+          secureTextEntry={true}/>
         <TouchableHighlight
           style={styles.button}
           onPress={this.handleSignIn.bind(this)}
