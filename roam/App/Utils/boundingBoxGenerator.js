@@ -10,7 +10,7 @@ module.exports = function(req) {
   amount of time
   */
   // const offsetToDegrees = 0.02;
-  const offsetToDegrees = req.body.boundingBox;
+  let offsetToDegrees = req.body.boundingBox;
   //or user chooses mile radius
 
   var dateMS = Date.now();
