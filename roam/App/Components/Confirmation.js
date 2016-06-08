@@ -4,6 +4,40 @@ var styles = require('./Helpers/styles');
 
 class Confirmation extends Component {
 
+  constructor(props) {
+    super(props);
+  }
+
+  componentWillMount() {
+    //handle fetch
+    let coordinates = {};
+
+    navigator.geolocation.getCurrentPosition( position => {
+      coordinates = position;
+      fetch('http://localhost:3000/roam', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          time: this.state.selectedOption,
+          coordinates: coordinates,
+          userEmail: this.props.navigator.navigationContext._currentRoute.email
+        })
+      })
+      .then((res) => {
+        if (res === 'You have been matched!'){
+          //send push notification to user
+          
+        }
+      })
+      .catch((error) => {
+        console.log('Error handling submit:', error);
+      });
+    });
+  }
+
   handleCancel() {
     //we will cancel roam from here
     //remove the roam from db
