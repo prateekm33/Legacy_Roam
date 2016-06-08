@@ -40,6 +40,10 @@ class Time extends Component {
     });
   }
 
+  handleHistory() {
+    console.log('page not built yet!');
+  }
+
   render () {
     const options = [
       '1 hour',
@@ -65,6 +69,11 @@ class Time extends Component {
           style={styles.button}
           onPress={this.handleSubmit.bind(this)} >
             <Text style={styles.buttonText}> Roam! </Text>
+        </TouchableHighlight>
+        <TouchableHighlight
+          style={styles.button}
+          onPress={this.handleHistory.bind(this)} >
+            <Text style={styles.buttonText}> View History </Text>
         </TouchableHighlight>
       </Image>
     );
