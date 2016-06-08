@@ -32,38 +32,10 @@ class Time extends Component {
   }
 
   handleSubmit() {
-    let coordinates = {};
-
-    navigator.geolocation.getCurrentPosition( position => {
-      coordinates = position;
-      fetch('http://localhost:3000/roam', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          time: this.state.selectedOption,
-          coordinates: coordinates,
-          userEmail: this.props.navigator.navigationContext._currentRoute.email
-        })
-      })
-      .then((res) => {
-        if (res === 'You have been matched!'){
-          //send push notification to user
-          
-        }
-      })
-      .catch((error) => {
-        console.log('Error handling submit:', error);
-      });
-    });
-
     console.log('Sending ROAM request!', coordinates);
     this.props.navigator.push({
       title: 'Confirmation',
       email: this.props.navigator.navigationContext._currentRoute.email,
-      coordinates: coordinates,
       component: Confirmation
     });
   }
