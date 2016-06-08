@@ -44,6 +44,7 @@ app.post('/signup', function(req, res){
 
   //Check database to see if incoming email on signup already exists
   apoc.query('MATCH (n:User {email: "%email%"}) RETURN n', { email: data.email }).exec().then(function(queryRes) {
+    console.log(queryRes[0].data);
     //If there is no matching email in the database
     if (queryRes[0].data.length === 0) {
       //Hash password upon creation of account
@@ -55,6 +56,7 @@ app.post('/signup', function(req, res){
           if (err) {
             console.log('Error hashing password', err);
           }
+          data.email = data.email.toLowerCase();
           data.password = hash;
           //Creates new server in database
           apoc.query('CREATE (newUser:User {firstName: "%firstName%", lastName: "%lastName%", password: "%password%", email: "%email%"});', data).exec().then(
@@ -79,7 +81,7 @@ app.post('/signin', function(req, res){
   var data = req.body;
   apoc.query('MATCH (n:User {email: "%email%"}) RETURN n.password', {email: data.email}).exec().then(function(queryRes){
     if(queryRes[0].data.length === 0) {
-      res.send(JSON.stringify({message: 'Incorrect email/password combination!'}));
+      res.send(JSON.stringify({message: '1.Incorrect email/password combination!'}));
     } else {
       console.log(queryRes[0].data[0].row[0]);
       bcrypt.compare(data.password, queryRes[0].data[0].row[0], function(err, bcryptRes){
@@ -89,7 +91,7 @@ app.post('/signin', function(req, res){
         if(bcryptRes){
           res.send(JSON.stringify({message: 'Password Match'}));
         } else {
-          res.send(JSON.stringify({message: 'Incorrect email/password combination!'}));
+          res.send(JSON.stringify({message: '2.Incorrect email/password combination!'}));
         }
       });
     }
@@ -113,7 +115,10 @@ app.post('/roam', function(req, res) {
   }
   var coords = boundingBoxGenerator(req); //bounding box coordinates
   var times = roamOffGenerator(req); //time until roam ends
+
   console.log(Roamers, 'roamers');
+  console.log('about to query db');
+
   //Checks to make sure if there is an existing pending roam within similar location by a different user
   apoc.query('MATCH (n:Roam) WHERE n.creatorRoamEnd > %currentDate% AND n.creatorLatitude < %maxLat% AND n.creatorLatitude > %minLat% AND n.creatorLongitude < %maxLong% AND n.creatorLongitude > %minLong% AND n.creatorEmail <> "%userEmail%" AND n.numRoamers < %Roamers% AND n.maxRoamers = %Roamers% RETURN n', {currentDate:dateMS, maxLat: coords.maxLat, minLat: coords.minLat, maxLong: coords.maxLong, minLong: coords.minLong, userEmail: userEmail, Roamers: Roamers, maxRoamers: Roamers}).exec().then(function(matchResults) {
     

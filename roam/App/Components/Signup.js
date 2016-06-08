@@ -65,6 +65,8 @@ class SignUp extends Component {
         return res.json();
       })
       .then((res) => {
+        console.log('RESPONSE FROM SERVER ON SIGNUP PAGE', res);
+
         if (res.message === 'User created') {
           this.props.navigator.push({
             title: 'Select Time',
