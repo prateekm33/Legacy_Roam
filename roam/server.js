@@ -131,6 +131,9 @@ app.post('/roam', function(req, res) {
           });
         });
       });
+    
+    res.send('No match currently');
+
 		} else { //Roam node found within a similar geographic location
       console.log('Found a match', matchResults[0].data[0].meta[0].id);
 
@@ -160,7 +163,7 @@ app.post('/roam', function(req, res) {
 	          console.log('Message sent: ' + info.response);
 	        });
 
-          res.send("You have been matched"); 
+          res.send("You have been matched!"); 
         });
     }
 	});

@@ -4,6 +4,14 @@ var styles = require('./Helpers/styles');
 
 class Confirmation extends Component {
 
+  constructor(props) {
+    super(props);
+  }
+
+  componentWillMount() {
+    //handle fetch
+  }
+
   handleCancel() {
     //we will cancel roam from here
     //remove the roam from db
