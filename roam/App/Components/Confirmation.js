@@ -13,7 +13,7 @@ class Confirmation extends Component {
     //handle fetch
     let coordinates = {};
     var context = this;
-    
+
     const fetchRoam = function(coordinates, bounds) {
       fetch('http://localhost:3000/roam', {
           method: 'POST',
@@ -76,7 +76,6 @@ class Confirmation extends Component {
         fetchCounter++;
         fetchCounter === time ? clearInterval(clearTimer) : null;
       }, tenMinutes);
-      
     });
   }
 

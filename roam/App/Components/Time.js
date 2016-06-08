@@ -4,6 +4,7 @@ import Geolocation from './Geolocation';
 // var Geolocation = require('./Geolocation');
 var Confirmation = require('./Confirmation');
 var iBeacon = require('./iBeacon');
+var History = require('./History');
 var Separator = require('./Helpers/Separator');
 var styles = require('./Helpers/styles');
 
@@ -53,6 +54,10 @@ class Time extends Component {
 
   handleHistory() {
     console.log('page not built yet!');
+    this.props.navigator.push({
+      title: 'History',
+      component: RateExperience
+    });
   }
 
   iBeacon() {
