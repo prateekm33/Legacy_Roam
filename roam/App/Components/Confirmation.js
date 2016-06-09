@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {Text, View, Image, TouchableHighlight, ListView} from 'react-native'
+import {Alert, Text, View, Image, TouchableHighlight, ListView} from 'react-native';
+import YourRoam from './YourRoam';
 var styles = require('./Helpers/styles');
 var _ = require('underscore');
 
@@ -14,7 +15,7 @@ class Confirmation extends Component {
     let coordinates = {};
     var context = this;
     
-    const fetchRoam = function(coordinates, bounds) {
+    const fetchRoam = function(coordinates, bounds, clearTimer) {
       fetch('http://localhost:3000/roam', {
           method: 'POST',
           headers: {
@@ -29,13 +30,12 @@ class Confirmation extends Component {
             boundingBox: bounds
           })
         })
-        .then((res) => {
-          if (res === 'You have been matched!'){
-            clearInterval(clearTimer);
-            console.log('FOUND A MATCH!!!!!!!!!!');
+        .then(res => res.json())
+        .then(data => {
+          if (data === 'You have been matched!'){
             //TODO: send push notification to user
-              //TODO: modify render Text to include this change
-            //TODO: send user to new RoamDetails Page
+            clearInterval(clearTimer);
+            context.yourRoam.bind(context)();
           }
         })
         .catch((error) => {
@@ -68,16 +68,21 @@ class Confirmation extends Component {
       d_fetchRoam(position, bounds);
 
       let clearTimer = setInterval(() => {
-        //TODO: optimization needs to be done here
-        //fetch could still not be done when another fetch is made
         bounds += 0.04;
-        d_fetchRoam(position, bounds);
+        d_fetchRoam(position, bounds, clearTimer);
 
         fetchCounter++;
         fetchCounter === time ? clearInterval(clearTimer) : null;
       }, tenMinutes);
       
     });
+  }
+
+  yourRoam() {
+    this.props.navigator.push({
+      title: 'Your Roam',
+      component: YourRoam
+    })
   }
 
   handleCancel() {

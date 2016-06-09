@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
 import { SegmentedControls } from 'react-native-radio-buttons';
 import Geolocation from './Geolocation';
-// var Geolocation = require('./Geolocation');
 var Confirmation = require('./Confirmation');
-var iBeacon = require('./iBeacon');
 var Separator = require('./Helpers/Separator');
 var styles = require('./Helpers/styles');
 
@@ -55,14 +53,6 @@ class Time extends Component {
     console.log('page not built yet!');
   }
 
-  iBeacon() {
-    this.props.navigator.push({
-      title: 'iBeacon', 
-      email: this.props.navigator.navigationContext._currentRoute.email, 
-      component: iBeacon
-    })
-  }
-
   render () {
     const options = [
       '1 hour',
@@ -108,10 +98,6 @@ class Time extends Component {
           style={styles.button}
           onPress={this.handleHistory.bind(this)} >
             <Text style={styles.buttonText}> View History </Text>
-        <TouchableHighlight
-          style={styles.button}
-          onPress={this.iBeacon.bind(this)}>
-          <Text>iBeacon</Text>
         </TouchableHighlight>
       </Image>
     );
