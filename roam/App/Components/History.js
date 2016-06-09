@@ -3,12 +3,14 @@ import React, { Component } from 'react';
 var Separator = require('./Helpers/Separator');
 var HistoryElem = require('./HistoryElem');
 var styles = require('./Helpers/styles');
+var Time = require('./Time')
 
 import {
   Image,
   View,
   Text,
-  StyleSheet
+  StyleSheet,
+  TouchableHighlight
 } from 'react-native';
 
 class History extends Component {
@@ -20,7 +22,7 @@ class History extends Component {
   }
 
   componentWillMount() {
-    fetch('http://localhost:3000/history', {
+    fetch('http://localhost:3000/history?email=' + this.props.navigator.navigationContext._currentRoute.email, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -39,6 +41,10 @@ class History extends Component {
     })
   }
 
+  returnToMain() {
+    this.props.navigator.pop();
+  }
+
   render() {
     return (
       <Image style={styles.backgroundImage}
@@ -47,6 +53,11 @@ class History extends Component {
       {this.state.experiences.map((res, index) => {
         return <HistoryElem key={index} data={res}/>
       })}
+      <TouchableHighlight
+        style={styles.button}
+        onPress={this.returnToMain.bind(this)} >
+          <Text style={styles.buttonText}>New Roam</Text>
+      </TouchableHighlight>
       </Image>
     );
   }

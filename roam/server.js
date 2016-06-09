@@ -186,6 +186,7 @@ app.post('/roam', function(req, res) {
           (() => {
             console.log(roamInfo);
             //this time will be when to set the roam to completed.
+            //for now, just wait 30 seconds though
             console.log('timeRemaining', (roamInfo.creatorRoamEnd - roamInfo.creatorRoamStart) / (1000*60), 'minutes');
             setTimeout(()=>{
               console.log('changing roam status to Completed', roamInfo.creatorEmail);
@@ -234,42 +235,69 @@ app.post('/cancel', function(req, res){
   });
 });
 
-//Simplified version of what db query will return for history
-var DUMMYDATA = [
-  {
-    roam: {
-      location: 'A location'
-    },
-    people: [
-      {name: 'A person'},
-      {name: 'Another person'}
-    ]    
-  },
-  {
-    roam: {
-      location: 'Somewhere else'
-    },
-    people: [
-      {name: 'X'},
-      {name: 'Y'},
-      {name: 'Z'}
-    ]
-  }
-];
-
 //Check for recently completed roams
 app.get('/finished', function(req, res){
-  res.json(DUMMYDATA);
+  var userEmail = req.query.email;
+  console.log('useremail is:', userEmail);
+
+  apoc.query('MATCH (n:User {email:"%email%"})-[:CREATED]->(m:Roam{status:"Completed"}) return m', {email:userEmail}).exec().then((queryRes)=> {
+    if(queryRes[0].data.length === 0){
+      res.json({
+        venue: '',
+        id: null
+      });
+    } else {
+      console.log(JSON.stringify(queryRes[0], 4, 2));
+      console.log(queryRes[0].data[0].meta[0].id);
+      res.json({
+        venue: queryRes[0].data[0].row[0].venueName,
+        id: queryRes[0].data[0].meta[0].id
+      });
+    }
+  });
 });
 
 //Save roam ratings from user
 app.post('/finished', function(req, res){
-  res.json();
+  var userEmail = req.body.email;
+  var rating = +req.body.rating; //number coercion
+  var roamId = +req.body.roamId; //number coercion
+
+  console.log(userEmail, rating, roamId);
+
+  apoc.query('MATCH (n:User {email:"%email%"})-[r]->(m:Roam{status:"Completed"}) WHERE id(m)=%id% CREATE (n)-[:ROAMED{rated:%rating%}]->(m) DELETE r return m', {email:userEmail, id:roamId, rating:rating}).exec().then((queryRes)=>{
+    res.send('rating success');
+  });
 });
 
 //Get all completed, rated roams for user
 app.get('/history', function(req, res){
-  res.json(DUMMYDATA);
+  var userEmail = req.query.email;
+  console.log('useremail is:', userEmail);
+
+  apoc.query('MATCH (n:User {email:"%email%"})-[r:ROAMED]->(m:Roam{status:"Completed"})<--(p:User)  RETURN r,m,p', {email: userEmail}).exec().then(function(queryRes){
+    var organizedData = [];
+    queryRes[0].data.forEach((roamData)=>{
+      console.log(roamData.row[0]);
+      var newRoam = {roam: {}, people: []};
+      newRoam.roam.rating = roamData.row[0].rated;
+      newRoam.roam.location = roamData.row[1].venueName;
+      newRoam.roam.date = roamData.row[1].creatorRoamStart;
+      if(Array.isArray(roamData.row[2])){
+        roamData.row[2].forEach((person)=>{
+          console.log(person);
+          newRoam.people.push({name: person.firstName + ' ' + person.lastName});
+        });        
+      } else {
+        newRoam.people.push({name: roamData.row[2].firstName + ' ' + roamData.row[2].lastName});
+      }
+      organizedData.push(newRoam);
+    })
+    console.log(queryRes[0].data);
+    res.json(organizedData);
+  }, function(fail){
+    console.log(fail);
+  });
 });
 
 app.listen(3000, function(){

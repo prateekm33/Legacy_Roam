@@ -53,9 +53,9 @@ class Time extends Component {
   }
 
   handleHistory() {
-    console.log('page not built yet!');
     this.props.navigator.push({
       title: 'History',
+      email: this.props.navigator.navigationContext._currentRoute.email,
       component: History
     });
   }
@@ -124,5 +124,3 @@ class Time extends Component {
 }
 
 module.exports = Time;
-
-

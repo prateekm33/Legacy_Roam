@@ -5,6 +5,8 @@ var Time = require('./Time');
 
 var styles = require('./Helpers/styles');
 
+console.log('Time on Signup page = ', Time);
+
 import {
   View,
   Image,

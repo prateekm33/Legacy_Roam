@@ -1,9 +1,14 @@
 import React, { Component } from 'react';
 
+var RateExperience = require('./RateExperience');
+
 //Require authentication component
 var SignUp = require('./Signup');
 var Time = require('./Time');
+
 var styles = require('./Helpers/styles');
+
+console.log('Time on Main page = ', Time);
 
 import {
   Image,
@@ -78,13 +83,43 @@ class Main extends Component {
         if(res.message === 'Incorrect email/password combination!'){
           this.setState({errorMessage: res.message, error: true, isLoading: false});
         } else{
-          this.props.navigator.push({
-            title: 'When are you free?',
-            email: this.state.email.toLowerCase(),
-            component: Time
-          });
-          this.setState({
-            isLoading: false
+          //check to see if user has recent roams
+          fetch('http://localhost:3000/finished?email=' + this.state.email.toLowerCase(), {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          })
+          .then((res) => {
+            return res.json();
+          })
+          .then((res) => {
+            this.setState({
+              isLoading: false
+            });            
+            if(res.id !== null){ //if so, go to ratings page
+              console.log('rate the roam');
+              this.setState({
+                isLoading: true
+              });
+              this.props.navigator.push({
+                title: 'How was your roam?',
+                email: this.state.email.toLowerCase(),
+                component: RateExperience,
+                lastRoam: {id:res.id, venue:res.venue}
+              });
+              this.setState({
+                isLoading: false
+              });
+            } else { //otherwise continue to scheduling page
+              console.log('continue to main page');
+              this.props.navigator.push({
+                title: 'When are you free?',
+                email: this.state.email.toLowerCase(),
+                component: Time
+              });
+            }
           });
         }
       })
