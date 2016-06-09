@@ -38,7 +38,7 @@ class Time extends Component {
   }
 
   handleSubmit() {
-    console.log('Sending ROAM request!');
+    console.log('Sending ROAM request!!');
     this.props.navigator.push({
       title: 'Confirmation',
       selectedTime: this.state.selectedTime,
@@ -50,7 +50,7 @@ class Time extends Component {
   }
 
   handleHistory() {
-    console.log('page not built yet!');
+    console.log('page not built yet!!!');
   }
 
   render () {
