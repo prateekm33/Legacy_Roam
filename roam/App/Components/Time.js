@@ -50,7 +50,7 @@ class Time extends Component {
   }
 
   handleHistory() {
-    console.log('page not built yet!');
+    console.log('page not built yet!!!');
   }
 
   render () {
