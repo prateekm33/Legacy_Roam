@@ -19,14 +19,18 @@ class HistoryElem extends Component {
   }
 
   render() {
+    var stars = [];
+    for(var i = 0; i < this.props.data.roam.rating; i++){
+      stars.push("⭐");
+    }
     return (
-      <View>
+      <View style = {styles.historyBox}>
         <Text style = {styles.location}>{this.props.data.roam.location}</Text>
-        <Text style = {styles.location}>Rating: {this.props.data.roam.rating}</Text>
-        <Text style = {styles.location}>{new Date(this.props.data.roam.date).toLocaleDateString()}</Text>
+        <Text style = {styles.history}>{new Date(this.props.data.roam.date).toLocaleDateString()}</Text>
+        <Text style = {styles.location}>{stars}</Text>
         <Text style = {styles.location}>Roamers:</Text>
         {this.props.data.people.map((res, index) => {
-          return <Text key={index}>{res.name}</Text>
+          return <Text style = {styles.history} key={index}>{res.name}</Text>
         })}
       </View>
     );

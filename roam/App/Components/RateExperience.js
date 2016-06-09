@@ -70,8 +70,7 @@ class RateExperience extends Component {
     return (
       <Image style={styles.backgroundImage}
       source = {require('../../imgs/uni.jpg')}>
-      <Text style={styles.header}>How was your Roam at {this.state.venue}?</Text>
-      <Text style={styles.confirmation}>{this.state.venue}</Text>
+      <Text style={styles.confirmation}>How was your Roam at {this.state.venue}?</Text>
       <SegmentedControls
         tint={'#ff0066'}
         selectedTint={'white'}
@@ -90,7 +89,7 @@ class RateExperience extends Component {
         <TouchableHighlight
           style={styles.button}
           onPress={this.handleSubmit.bind(this)} >
-            <Text style={styles.buttonText}> Roam! </Text>
+            <Text style={styles.buttonText}> Continue Roaming </Text>
         </TouchableHighlight>
       </Image>
     );

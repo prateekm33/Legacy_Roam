@@ -108,7 +108,20 @@ const styles = StyleSheet.create({
     fontSize: 25,
     color: 'white',
     textAlign: 'center'
-  }
+  },
+  historyBox: {
+    backgroundColor: 'rgba(255,000,255,0.1)',
+    borderWidth: 1,
+    borderColor: 'white',
+    borderRadius: 8,
+    margin: 10
+  },
+  history: {
+    backgroundColor: 'transparent',
+    fontSize: 20,
+    color: 'white',
+    textAlign: 'center'
+  },
 });
 
 module.exports = styles;
