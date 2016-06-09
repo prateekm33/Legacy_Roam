@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {Text, View, Image, TouchableHighlight, ListView} from 'react-native'
+import {Alert, Text, View, Image, TouchableHighlight, ListView} from 'react-native';
+import YourRoam from './YourRoam';
 var styles = require('./Helpers/styles');
 var _ = require('underscore');
 
@@ -16,9 +17,7 @@ class Confirmation extends Component {
     //handle fetch
     let coordinates = {};
     var context = this;
-
-    const fetchRoam = function(coordinates, bounds) {
-      console.log('sending ROAM request');
+    const fetchRoam = function(coordinates, bounds, clearTimer) {
       fetch('http://localhost:3000/roam', {
           method: 'POST',
           headers: {
@@ -33,14 +32,13 @@ class Confirmation extends Component {
             boundingBox: bounds
           })
         })
-        .then((res) => {
-          return res.json();
-        })
+        .then(res => res.json())
         .then((res) => {
           console.log('RESULT', res, typeof res);
           if (res.status !== 'No match'){
             //TODO: fix clearTimer
             //clearInterval(clearTimer);
+            //context.yourRoam.bind(context)();
             console.log('FOUND A MATCH!!!!!!!!!!');
             context.setState({
               roam: {
@@ -49,9 +47,6 @@ class Confirmation extends Component {
                 numRoamers: res.numRoamers,
               }
             });
-            //TODO: send push notification to user
-              //TODO: modify render Text to include this change
-            //TODO: send user to new RoamDetails Page
           }
         })
         .catch((error) => {
@@ -84,15 +79,20 @@ class Confirmation extends Component {
       d_fetchRoam(position, bounds);
 
       let clearTimer = setInterval(() => {
-        //TODO: optimization needs to be done here
-        //fetch could still not be done when another fetch is made
         bounds += 0.04;
-        d_fetchRoam(position, bounds);
+        d_fetchRoam(position, bounds, clearTimer);
 
         fetchCounter++;
         fetchCounter === time ? clearInterval(clearTimer) : null;
       }, tenMinutes);
     });
+  }
+
+  yourRoam() {
+    this.props.navigator.push({
+      title: 'Your Roam',
+      component: YourRoam
+    })
   }
 
   handleCancel() {
