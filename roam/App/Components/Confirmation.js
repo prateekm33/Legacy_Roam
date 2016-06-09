@@ -25,6 +25,7 @@ class Confirmation extends Component {
             coordinates: coordinates,
             userEmail: context.props.navigator.navigationContext._currentRoute.email, 
             time: context.props.navigator.navigationContext._currentRoute.selectedTime, 
+            groupSize: context.props.navigator.navigationContext._currentRoute.selectedGroup,  
             boundingBox: bounds
           })
         })
