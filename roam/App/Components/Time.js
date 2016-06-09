@@ -41,7 +41,6 @@ class Time extends Component {
   }
 
   handleSubmit() {
-    console.log('Sending ROAM request!');
     this.props.navigator.push({
       title: 'Confirmation',
       selectedTime: this.state.selectedTime,
@@ -113,6 +112,7 @@ class Time extends Component {
           style={styles.button}
           onPress={this.handleHistory.bind(this)} >
             <Text style={styles.buttonText}> View History </Text>
+        </TouchableHighlight>
         <TouchableHighlight
           style={styles.button}
           onPress={this.iBeacon.bind(this)}>

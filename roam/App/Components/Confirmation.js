@@ -15,6 +15,7 @@ class Confirmation extends Component {
     var context = this;
 
     const fetchRoam = function(coordinates, bounds) {
+      console.log('sending ROAM request');
       fetch('http://localhost:3000/roam', {
           method: 'POST',
           headers: {
