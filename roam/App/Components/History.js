@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 var Separator = require('./Helpers/Separator');
+var HistoryElem = require('./HistoryElem');
 var styles = require('./Helpers/styles');
 
 import {
@@ -14,7 +15,7 @@ class History extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      experiences: ''
+      experiences: []
     }
   }
 
@@ -33,7 +34,7 @@ class History extends Component {
     .then((res) => {
       console.log(res);
       this.setState({
-        experiences: res.roam.location
+        experiences: res
       })
     })
   }
@@ -43,7 +44,9 @@ class History extends Component {
       <Image style={styles.backgroundImage}
       source = {require('../../imgs/uni.jpg')}>
       <Text style={styles.header}>History</Text>
-      <Text style={styles.confirmation}>{this.state.experiences}</Text>
+      {this.state.experiences.map((res, index) => {
+        return <HistoryElem key={index} data={res}/>
+      })}
       </Image>
     );
   }
