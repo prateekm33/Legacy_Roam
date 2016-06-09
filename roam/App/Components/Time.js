@@ -40,6 +40,7 @@ class Time extends Component {
   }
 
   handleSubmit() {
+    console.log('Sending ROAM request!!');
     this.props.navigator.push({
       title: 'Confirmation',
       selectedTime: this.state.selectedTime,
