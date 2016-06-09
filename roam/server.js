@@ -153,7 +153,7 @@ app.post('/roam', function(req, res) {
     
     res.send('No match currently');
 
-		} else { //Roam node found within a similar geographic location
+    } else { //Roam node found within a similar geographic location
       console.log('Found a match', matchResults[0].data[0].meta[0].id);
 
       var id = matchResults[0].data[0].meta[0].id;
@@ -166,21 +166,32 @@ app.post('/roam', function(req, res) {
           var date = formattedDateHtml();
 
           //Generates an automatic email message
-	        var mailOptions = {
-	          from: '"Roam" <Roamincenterprises@gmail.com>', // sender address 
-	          bcc: roamInfo.creatorEmail + ',' + userEmail, // List of users who are matched
-	          subject: 'Your Roam is Ready!', // Subject line 
-	          text: 'Your Roam is at:' + roamInfo.venueName + ' Roam Address: ' + roamInfo.venueAddress, // plaintext body 
-	          html: generateEmail(roamInfo.venueName, roamInfo.venueAddress, date) // html body 
-	        };
-	         
-	        // send mail with defined transport object 
-	        transporter.sendMail(mailOptions, function(error, info){
-	          if(error){
+          var mailOptions = {
+            from: '"Roam" <Roamincenterprises@gmail.com>', // sender address 
+            bcc: roamInfo.creatorEmail + ',' + userEmail, // List of users who are matched
+            subject: 'Your Roam is Ready!', // Subject line 
+            text: 'Your Roam is at:' + roamInfo.venueName + ' Roam Address: ' + roamInfo.venueAddress, // plaintext body 
+            html: generateEmail(roamInfo.venueName, roamInfo.venueAddress, date) // html body 
+          };
+           
+          // send mail with defined transport object 
+          transporter.sendMail(mailOptions, function(error, info){
+            if(error){
 	            return console.log(error);
 	          }
 	          console.log('Message sent: ' + info.response);
-	        });
+          });
+
+          //If roam match has occured, when max time is reached, change status to Completed
+          (() => {
+            console.log(roamInfo);
+            //this time will be when to set the roam to completed.
+            console.log('timeRemaining', (roamInfo.creatorRoamEnd - roamInfo.creatorRoamStart) / (1000*60), 'minutes');
+            setTimeout(()=>{
+              console.log('changing roam status to Completed', roamInfo.creatorEmail);
+              apoc.query('MATCH (m:Roam {creatorEmail: "%creatorEmail%"}) WHERE m.status="Active" SET m.status="Completed" RETURN m', {creatorEmail: roamInfo.creatorEmail}).exec();  
+            }, 30000);
+          })();
 
           res.send("You have been matched!"); 
         })
@@ -223,16 +234,28 @@ app.post('/cancel', function(req, res){
   });
 });
 
-//Simplified version of what db query will return
-var DUMMYDATA = {
-  roam: {
-    location: 'A location'
+//Simplified version of what db query will return for history
+var DUMMYDATA = [
+  {
+    roam: {
+      location: 'A location'
+    },
+    people: [
+      {name: 'A person'},
+      {name: 'Another person'}
+    ]    
   },
-  people: [
-    {name: 'A person'},
-    {name: 'Another person'}
-  ]
-};
+  {
+    roam: {
+      location: 'Somewhere else'
+    },
+    people: [
+      {name: 'X'},
+      {name: 'Y'},
+      {name: 'Z'}
+    ]
+  }
+];
 
 //Check for recently completed roams
 app.get('/finished', function(req, res){
