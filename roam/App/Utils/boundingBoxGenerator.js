@@ -3,7 +3,15 @@
 
 module.exports = function(req) {
 
-  const offsetToDegrees = 0.02;
+
+  /*
+  can set this as a variable that increases to a max
+  size if a roam hasn't been found within a given
+  amount of time
+  */
+  // const offsetToDegrees = 0.02;
+  let offsetToDegrees = req.body.boundingBox;
+  //or user chooses mile radius
 
   var dateMS = Date.now();
   var userLatitude = Number(req.body.coordinates.coords.latitude);
