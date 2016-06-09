@@ -56,7 +56,7 @@ class Time extends Component {
     console.log('page not built yet!');
     this.props.navigator.push({
       title: 'History',
-      component: RateExperience
+      component: History
     });
   }
 

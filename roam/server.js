@@ -229,25 +229,24 @@ var DUMMYDATA = {
     location: 'A location'
   },
   people: [
-    {name: 'A person'}
+    {name: 'A person'},
+    {name: 'Another person'}
   ]
 };
 
 //Check for recently completed roams
-app.get('/finished', function(req, rep){
-
+app.get('/finished', function(req, res){
+  res.json(DUMMYDATA);
 });
 
 //Save roam ratings from user
-app.post('/finished', function(req, rep){
-  
+app.post('/finished', function(req, res){
+  res.json();
 });
 
 //Get all completed, rated roams for user
-app.get('/history', function(req, rep){
-  //JUST SEND DUMMY DATA FOR NOW
-  //if there are 
-  res.send();
+app.get('/history', function(req, res){
+  res.json(DUMMYDATA);
 });
 
 app.listen(3000, function(){
