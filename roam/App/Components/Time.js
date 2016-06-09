@@ -2,11 +2,8 @@ import React, { Component } from 'react';
 import { SegmentedControls } from 'react-native-radio-buttons';
 import Geolocation from './Geolocation';
 var Confirmation = require('./Confirmation');
-<<<<<<< bfc44e8341e04de2fbfb7c444e664a8ec73bfa9d
 var iBeacon = require('./iBeacon');
 var History = require('./History');
-=======
->>>>>>> your roam page logic and page added
 var Separator = require('./Helpers/Separator');
 var styles = require('./Helpers/styles');
 
@@ -59,6 +56,7 @@ class Time extends Component {
       email: this.props.navigator.navigationContext._currentRoute.email,
       component: History
     });
+    console.log('page not built yet!!!');
   }
 
   render () {
@@ -106,14 +104,11 @@ class Time extends Component {
           style={styles.button}
           onPress={this.handleHistory.bind(this)} >
             <Text style={styles.buttonText}> View History </Text>
-<<<<<<< bfc44e8341e04de2fbfb7c444e664a8ec73bfa9d
         </TouchableHighlight>
         <TouchableHighlight
           style={styles.button}
           onPress={this.iBeacon.bind(this)}>
           <Text>iBeacon</Text>
-=======
->>>>>>> your roam page logic and page added
         </TouchableHighlight>
       </Image>
     );
