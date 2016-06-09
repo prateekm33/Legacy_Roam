@@ -22,22 +22,27 @@ class Time extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedOption: '1 hour'
+      selectedTime: '1 hour'
     };
   }
   handleSelected(choice) {
     this.setState({
-      selectedOption: choice
+      selectedTime: choice
     });
   }
 
   handleSubmit() {
-    console.log('Sending ROAM request!', coordinates);
+    console.log('Sending ROAM request!');
     this.props.navigator.push({
       title: 'Confirmation',
+      selectedTime: this.state.selectedTime,
       email: this.props.navigator.navigationContext._currentRoute.email,
       component: Confirmation
     });
+  }
+
+  handleHistory() {
+    console.log('page not built yet!');
   }
 
   render () {
@@ -60,11 +65,16 @@ class Time extends Component {
           allowFontScaling={false}
           fontWeight={'bold'}
           onSelection={this.handleSelected.bind(this)}
-          selectedOption={this.state.selectedOption} />
+          selectedOption={this.state.selectedTime} />
         <TouchableHighlight
           style={styles.button}
           onPress={this.handleSubmit.bind(this)} >
             <Text style={styles.buttonText}> Roam! </Text>
+        </TouchableHighlight>
+        <TouchableHighlight
+          style={styles.button}
+          onPress={this.handleHistory.bind(this)} >
+            <Text style={styles.buttonText}> View History </Text>
         </TouchableHighlight>
       </Image>
     );
