@@ -67,11 +67,43 @@ class Main extends Component {
           })
         })
         .then((res) => {
-          res.json();
-          this.props.navigator.push({
-            title: 'When are you free?',
-            email: email,
-            component: Time
+          fetch('http://localhost:3000/finished?email=' + email.toLowerCase(), {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          })
+          .then((res) => {
+            return res.json();
+          })
+          .then((res) => {
+            console.log("CHECK YOUR EMAIL", email);
+            this.setState({
+              isLoading: false
+            });            
+            if(res.id !== null){ //if so, go to ratings page
+              console.log('rate the roam');
+              this.setState({
+                isLoading: true
+              });
+              this.props.navigator.push({
+                title: 'How was your roam?',
+                email: email,
+                component: RateExperience,
+                lastRoam: {id:res.id, venue:res.venue}
+              });
+              this.setState({
+                isLoading: false
+              });
+            } else { //otherwise continue to scheduling page
+              console.log('continue to main page');
+              this.props.navigator.push({
+                title: 'When are you free?',
+                email: email,
+                component: Time
+              });
+            }
           });
         })
         .catch((error) => {
