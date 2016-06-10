@@ -41,6 +41,7 @@ app.post('/signup', function(req, res){
   console.log('HELLOOOOOOO');
 
   var data = req.body;
+  console.log('data from signup', data);
 
   //Check database to see if incoming email on signup already exists
   apoc.query('MATCH (n:User {email: "%email%"}) RETURN n', { email: data.email }).exec().then(function(queryRes) {
@@ -57,7 +58,7 @@ app.post('/signup', function(req, res){
           }
           data.password = hash;
           //Creates new server in database
-          apoc.query('CREATE (newUser:User {firstName: "%firstName%", lastName: "%lastName%", password: "%password%", email: "%email%"});', data).exec().then(
+          apoc.query('CREATE (newUser:User {firstName: "%firstName%", lastName: "%lastName%", password: "%password%", email: "%email%", picture: "%picture%", fb: "%fb%"});', data).exec().then(
             function(dbRes){
               console.log('saved to database:', dbRes);
               res.send(JSON.stringify({message: 'User created'}));
@@ -77,6 +78,8 @@ app.post('/signup', function(req, res){
 //Validation for sign in page
 app.post('/signin', function(req, res){
   var data = req.body;
+  console.log('data from facebook signin', data);
+
   apoc.query('MATCH (n:User {email: "%email%"}) RETURN n.password', {email: data.email}).exec().then(function(queryRes){
     if(queryRes[0].data.length === 0) {
       res.send(JSON.stringify({message: 'Incorrect email/password combination!'}));
