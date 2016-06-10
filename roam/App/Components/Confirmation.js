@@ -16,7 +16,7 @@ class Confirmation extends Component {
     var context = this;
     
     const fetchRoam = function(coordinates, bounds, clearTimer) {
-      fetch('http://159.203.251.115/roam', {
+      fetch('https://roam-legacy.herokuapp.com/roam', {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
@@ -93,7 +93,7 @@ class Confirmation extends Component {
 
     this.props.navigator.pop();
 
-    fetch('http://159.203.251.115/cancel', {
+    fetch('https://roam-legacy.herokuapp.com/cancel', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
