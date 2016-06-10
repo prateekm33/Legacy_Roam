@@ -148,7 +148,7 @@ class Main extends Component {
     }
     //If email and password exists on the database, log the user into the select time page
     if(this.state.email !== '' && re.test(this.state.email) && this.state.password !== ''){
-      fetch('http://159.203.251.115/signin', {
+      fetch('http://159.203.251.115:3000/signin', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',

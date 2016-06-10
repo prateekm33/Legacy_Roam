@@ -99,7 +99,7 @@ class SignUp extends Component {
     //ensure all fields in our state is not empty
     if (this.state.firstName !== '' && this.state.lastName !== '' && this.state.password !== '' && this.state.passwordAgain !== '' && (this.state.password === this.state.passwordAgain) && re.test(this.state.email)) {
 
-      fetch('http://159.203.251.115/signup', {
+      fetch('http://159.203.251.115:3000/signup', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',

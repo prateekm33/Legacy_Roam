@@ -18,7 +18,7 @@ class Confirmation extends Component {
     let coordinates = {};
     var context = this;
     const fetchRoam = function(coordinates, bounds, clearTimer) {
-      fetch('http://159.203.251.115/roam', {
+      fetch('http://159.203.251.115:3000/roam', {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
@@ -103,7 +103,7 @@ class Confirmation extends Component {
 
     this.props.navigator.pop();
 
-    fetch('http://159.203.251.115/cancel', {
+    fetch('http://159.203.251.115:3000/cancel', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
