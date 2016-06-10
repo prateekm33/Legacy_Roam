@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
-
-// var Interests = require('./Interests');
 var Time = require('./Time');
-
 var styles = require('./Helpers/styles');
+const FBSDK = require('react-native-fbsdk');
+const {
+  LoginButton,
+  AccessToken,
+  GraphRequest,
+  GraphRequestManager
+} = FBSDK;
 
 import {
   View,
@@ -30,8 +34,53 @@ class SignUp extends Component {
     };
   }
 
+  getUser(token) {
+    fetch('https://graph.facebook.com/me?fields=name,email,picture.type(large)&access_token=' + token) 
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        var firstName = data.name.split(" ")[0];
+        var lastName = data.name.split(" ")[1];
+        var email = data.email;
+        var id = data.id;
+        var picture = data.picture.data.url;
+        fetch('http://localhost:3000/signup', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            firstName: firstName,
+            lastName: lastName,
+            fb: true,
+            email: email,
+            password: 'null',
+            picture: picture
+          })
+        })
+        .then((res) => {
+          console.log('firstName is ', firstName);
+          res.json();
+          this.props.navigator.push({
+            title: firstName + ' -- when are you free?',
+            email: email,
+            component: Time
+          });
+        })
+        .catch((error) => {
+          console.log('Error in facebook post to server', error);
+        })
+      })
+    .catch((error) => { 
+       console.log("Error in facebook get user infor", error);
+    });
+  }
+
+
   handleSubmit() {
-    console.log(this.state);
     this.setState({
       isLoading: true
     });
@@ -156,6 +205,26 @@ class SignUp extends Component {
           color="#111"
           size="large"></ActivityIndicatorIOS>
         {showErr}
+
+        <LoginButton
+          style={styles.button}
+          readPermissions={["email","user_friends", "public_profile"]}
+          onLoginFinished={
+            (error, result) => {
+              if (error) {
+                alert("login has error: " + result.error);
+              } else if (result.isCancelled) {
+                alert("login is cancelled.");
+              } else {
+                AccessToken.getCurrentAccessToken().then(
+                  (data) => {
+                    {this.getUser.bind(this, data.accessToken.toString())()};
+                  }
+                )
+              }
+            }
+          }
+          onLogoutFinished={() => alert("logout.")}/>
       </Image>
     )
   }
