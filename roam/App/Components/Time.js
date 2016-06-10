@@ -4,6 +4,7 @@ import Geolocation from './Geolocation';
 // var Geolocation = require('./Geolocation');
 var Confirmation = require('./Confirmation');
 var iBeacon = require('./iBeacon');
+var History = require('./History');
 var Separator = require('./Helpers/Separator');
 var styles = require('./Helpers/styles');
 
@@ -40,7 +41,6 @@ class Time extends Component {
   }
 
   handleSubmit() {
-    console.log('Sending ROAM request!');
     this.props.navigator.push({
       title: 'Confirmation',
       selectedTime: this.state.selectedTime,
@@ -52,7 +52,11 @@ class Time extends Component {
   }
 
   handleHistory() {
-    console.log('page not built yet!');
+    this.props.navigator.push({
+      title: 'History',
+      email: this.props.navigator.navigationContext._currentRoute.email,
+      component: History
+    });
   }
 
   iBeacon() {
@@ -108,6 +112,7 @@ class Time extends Component {
           style={styles.button}
           onPress={this.handleHistory.bind(this)} >
             <Text style={styles.buttonText}> View History </Text>
+        </TouchableHighlight>
         <TouchableHighlight
           style={styles.button}
           onPress={this.iBeacon.bind(this)}>
@@ -119,5 +124,3 @@ class Time extends Component {
 }
 
 module.exports = Time;
-
-
