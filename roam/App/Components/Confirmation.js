@@ -7,6 +7,9 @@ class Confirmation extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      roam: {}
+    };
   }
 
   componentWillMount() {
@@ -31,9 +34,21 @@ class Confirmation extends Component {
           })
         })
         .then((res) => {
-          if (res === 'You have been matched!'){
-            clearInterval(clearTimer);
+          return res.json();
+        })
+        .then((res) => {
+          console.log('RESULT', res, typeof res);
+          if (res.status !== 'No match'){
+            //TODO: fix clearTimer
+            //clearInterval(clearTimer);
             console.log('FOUND A MATCH!!!!!!!!!!');
+            context.setState({
+              roam: {
+                venue: res.venueName,
+                address: res.venueAddress,
+                numRoamers: res.numRoamers,
+              }
+            });
             //TODO: send push notification to user
               //TODO: modify render Text to include this change
             //TODO: send user to new RoamDetails Page
@@ -108,13 +123,25 @@ class Confirmation extends Component {
   }
 
   render() {
+    var venueInfo;
+    console.log('rendering', this.state.roam);
+    if(this.state.roam.venue){
+      venueInfo = [
+        <Text key="l1" style={styles.confirmation}>{this.state.roam.venue} with {this.state.roam.numRoamers} roamers</Text>,
+        <Text key="l2" style={styles.confirmation}>{this.state.roam.address}</Text>
+      ]
+    } else {
+      venueInfo = [
+        <Text key="l1" style={styles.confirmation}>Great! We are working on finding your next Roam!</Text>,
+        <Text key="l2" style={styles.confirmation}>We will notify you the details through email.</Text>
+      ];
+    }
+
     return (
       <Image style={styles.backgroundImage}
         source={require('../../imgs/uni.jpg')}>
         <Text style={styles.title}> roam </Text>
-
-          <Text style={styles.confirmation}>Great! We are working on finding your next Roam!</Text>
-          <Text style={styles.confirmation}>We will notify you the details through email.</Text>
+          {venueInfo}
           <TouchableHighlight
             style={styles.button}
             onPress={this.handleCancel.bind(this)}
