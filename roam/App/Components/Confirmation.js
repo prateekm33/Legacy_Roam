@@ -55,7 +55,7 @@ class Confirmation extends Component {
     } 
 
     const tenMinutes = 1000 * 60 * 10;
-    const d_fetchRoam = _.debounce(fetchRoam, tenMinutes, true);
+    const d_fetchRoam = _.debounce(fetchRoam, 5000, true);
 
     navigator.geolocation.getCurrentPosition( position => {
       let time = this.props.navigator.navigationContext._currentRoute.selectedTime;
@@ -81,10 +81,10 @@ class Confirmation extends Component {
       let clearTimer = setInterval(() => {
         bounds += 0.04;
         d_fetchRoam(position, bounds, clearTimer);
-
+        console.log('searching....');
         fetchCounter++;
-        fetchCounter === time ? clearInterval(clearTimer) : null;
-      }, tenMinutes);
+        fetchCounter === 100 ? clearInterval(clearTimer) : null;
+      }, 5000);
     });
   }
 

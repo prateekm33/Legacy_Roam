@@ -60,6 +60,10 @@ class Time extends Component {
     console.log('page not built yet!!!');
   }
 
+  iBeacon() {
+    
+  }
+
   render () {
     const options = [
       '1 hour',

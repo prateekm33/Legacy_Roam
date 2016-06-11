@@ -15,7 +15,7 @@ const {
   GraphRequestManager
 } = FBSDK;
 
-console.log('Time on Main page = ', Time);
+console.log('Time on Main page  = ', Time);
 
 import {
   Image,
@@ -51,7 +51,7 @@ class Main extends Component {
         var email = data.email;
         var id = data.id;
         var picture = data.picture.data.url;
-        fetch('http://localhost:3000/signup', {
+        fetch('http://159.203.251.115:3000/signup', {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
@@ -62,7 +62,7 @@ class Main extends Component {
             lastName: lastName,
             fb: true,
             email: email,
-            password: null,
+            password: 'null',
             picture: picture
           })
         })
@@ -167,7 +167,7 @@ class Main extends Component {
           this.setState({errorMessage: res.message, error: true, isLoading: false});
         } else{
           //check to see if user has recent roams
-          fetch('http://localhost:3000/finished?email=' + this.state.email.toLowerCase(), {
+          fetch('http://159.203.251.115:3000/finished?email=' + this.state.email.toLowerCase(), {
             method: 'GET',
             headers: {
               'Accept': 'application/json',
