@@ -1,9 +1,21 @@
 import React, { Component } from 'react';
 
+var RateExperience = require('./RateExperience');
+
 //Require authentication component
 var SignUp = require('./Signup');
 var Time = require('./Time');
+
 var styles = require('./Helpers/styles');
+const FBSDK = require('react-native-fbsdk');
+const {
+  LoginButton,
+  AccessToken,
+  GraphRequest,
+  GraphRequestManager
+} = FBSDK;
+
+console.log('Time on Main page  = ', Time);
 
 import {
   Image,
@@ -25,6 +37,82 @@ class Main extends Component {
       error: false,
       errorMessage: ''
     };
+  }
+
+  getUser(token) {
+    fetch('https://graph.facebook.com/me?fields=name,email,picture.type(large)&access_token=' + token) 
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data);
+        var firstName = data.name.split(" ")[0];
+        var lastName = data.name.split(" ")[1];
+        var email = data.email;
+        var id = data.id;
+        var picture = data.picture.data.url;
+        fetch('http://159.203.251.115:3000/signup', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            firstName: firstName,
+            lastName: lastName,
+            fb: true,
+            email: email,
+            password: 'null',
+            picture: picture
+          })
+        })
+        .then((res) => {
+          fetch('http://localhost:3000/finished?email=' + email.toLowerCase(), {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          })
+          .then((res) => {
+            return res.json();
+          })
+          .then((res) => {
+            console.log("CHECK YOUR EMAIL", email);
+            this.setState({
+              isLoading: false
+            });            
+            if(res.id !== null){ //if so, go to ratings page
+              console.log('rate the roam');
+              this.setState({
+                isLoading: true
+              });
+              this.props.navigator.push({
+                title: 'How was your roam?',
+                email: email,
+                component: RateExperience,
+                lastRoam: {id:res.id, venue:res.venue}
+              });
+              this.setState({
+                isLoading: false
+              });
+            } else { //otherwise continue to scheduling page
+              console.log('continue to main page');
+              this.props.navigator.push({
+                title: 'When are you free?',
+                email: email,
+                component: Time
+              });
+            }
+          });
+        })
+        .catch((error) => {
+          console.log('Error in facebook post to server', error);
+        })
+      })
+    .catch((error) => { 
+       console.log("Error in facebook get user infor", error);
+    });
   }
 
   handleEmail(event) {
@@ -78,13 +166,43 @@ class Main extends Component {
         if(res.message === 'Incorrect email/password combination!'){
           this.setState({errorMessage: res.message, error: true, isLoading: false});
         } else{
-          this.props.navigator.push({
-            title: 'When are you free?',
-            email: this.state.email.toLowerCase(),
-            component: Time
-          });
-          this.setState({
-            isLoading: false
+          //check to see if user has recent roams
+          fetch('http://159.203.251.115:3000/finished?email=' + this.state.email.toLowerCase(), {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          })
+          .then((res) => {
+            return res.json();
+          })
+          .then((res) => {
+            this.setState({
+              isLoading: false
+            });            
+            if(res.id !== null){ //if so, go to ratings page
+              console.log('rate the roam');
+              this.setState({
+                isLoading: true
+              });
+              this.props.navigator.push({
+                title: 'How was your roam?',
+                email: this.state.email.toLowerCase(),
+                component: RateExperience,
+                lastRoam: {id:res.id, venue:res.venue}
+              });
+              this.setState({
+                isLoading: false
+              });
+            } else { //otherwise continue to scheduling page
+              console.log('continue to main page');
+              this.props.navigator.push({
+                title: 'When are you free?',
+                email: this.state.email.toLowerCase(),
+                component: Time
+              });
+            }
           });
         }
       })
@@ -136,6 +254,25 @@ class Main extends Component {
           underlayColor="white" >
             <Text style={styles.buttonText}> Sign In </Text>
         </TouchableHighlight>
+        <LoginButton
+          style={styles.button}
+          readPermissions={["email","user_friends", "public_profile"]}
+          onLoginFinished={
+            (error, result) => {
+              if (error) {
+                alert("login has error: " + result.error);
+              } else if (result.isCancelled) {
+                alert("login is cancelled.");
+              } else {
+                AccessToken.getCurrentAccessToken().then(
+                  (data) => {
+                    {this.getUser.bind(this, data.accessToken.toString())()};
+                  }
+                )
+              }
+            }
+          }
+          onLogoutFinished={() => alert("logout.")}/>
         <TouchableHighlight
           // style={styles.button}
           onPress={this.handleSignUp.bind(this)}

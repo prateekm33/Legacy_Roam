@@ -1,9 +1,15 @@
 import React, { Component } from 'react';
-
-// var Interests = require('./Interests');
 var Time = require('./Time');
-
 var styles = require('./Helpers/styles');
+const FBSDK = require('react-native-fbsdk');
+const {
+  LoginButton,
+  AccessToken,
+  GraphRequest,
+  GraphRequestManager
+} = FBSDK;
+
+console.log('Time on Signup page = ', Time);
 
 import {
   View,
@@ -30,8 +36,53 @@ class SignUp extends Component {
     };
   }
 
+  getUser(token) {
+    fetch('https://graph.facebook.com/me?fields=name,email,picture.type(large)&access_token=' + token) 
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log('DATA:!!!!!', data);
+        var firstName = data.name.split(" ")[0];
+        var lastName = data.name.split(" ")[1];
+        var email = data.email;
+        var id = data.id;
+        var picture = data.picture.data.url;
+        fetch('http://159.203.251.115:3000/signup', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            firstName: firstName,
+            lastName: lastName,
+            fb: true,
+            email: email,
+            password: 'null',
+            picture: picture
+          })
+        })
+        .then((res) => {
+          console.log('firstName is ', firstName);
+          res.json();
+          this.props.navigator.push({
+            title: firstName + ' -- when are you free?',
+            email: email,
+            component: Time
+          });
+        })
+        .catch((error) => {
+          console.log('Error in facebook post to server', error);
+        })
+      })
+    .catch((error) => { 
+       console.log("Error in facebook get user infor", error);
+    });
+  }
+
+
   handleSubmit() {
-    console.log(this.state);
     this.setState({
       isLoading: true
     });
@@ -48,7 +99,7 @@ class SignUp extends Component {
     //ensure all fields in our state is not empty
     if (this.state.firstName !== '' && this.state.lastName !== '' && this.state.password !== '' && this.state.passwordAgain !== '' && (this.state.password === this.state.passwordAgain) && re.test(this.state.email)) {
 
-      fetch('http://https://roam-legacy.herokuapp.com/signup', {
+      fetch('http://159.203.251.115:3000/signup', {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -59,12 +110,16 @@ class SignUp extends Component {
           lastName: this.state.lastName,
           password: this.state.password,
           email: this.state.email,
+          fb: false, 
+          picture: null
         })
       })
       .then((res) => {
         return res.json();
       })
       .then((res) => {
+        console.log('RESPONSE FROM SERVER ON SIGNUP PAGE', res);
+
         if (res.message === 'User created') {
           this.props.navigator.push({
             title: 'Select Time',
@@ -156,6 +211,26 @@ class SignUp extends Component {
           color="#111"
           size="large"></ActivityIndicatorIOS>
         {showErr}
+
+        <LoginButton
+          style={styles.button}
+          readPermissions={["email","user_friends", "public_profile"]}
+          onLoginFinished={
+            (error, result) => {
+              if (error) {
+                alert("login has error: " + result.error);
+              } else if (result.isCancelled) {
+                alert("login is cancelled.");
+              } else {
+                AccessToken.getCurrentAccessToken().then(
+                  (data) => {
+                    {this.getUser.bind(this, data.accessToken.toString())()};
+                  }
+                )
+              }
+            }
+          }
+          onLogoutFinished={() => alert("logout.")}/>
       </Image>
     )
   }

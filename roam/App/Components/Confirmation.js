@@ -8,15 +8,18 @@ class Confirmation extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      roam: {}
+    };
   }
 
   componentWillMount() {
     //handle fetch
     let coordinates = {};
     var context = this;
-    
+
     const fetchRoam = function(coordinates, bounds, clearTimer) {
-      fetch('https://roam-legacy.herokuapp.com/roam', {
+      fetch('http://159.203.251.115:3000/roam', {
           method: 'POST',
           headers: {
             'Accept': 'application/json',
@@ -31,11 +34,20 @@ class Confirmation extends Component {
           })
         })
         .then(res => res.json())
-        .then(data => {
-          if (data === 'You have been matched!'){
-            //TODO: send push notification to user
-            clearInterval(clearTimer);
-            context.yourRoam.bind(context)();
+        .then((res) => {
+          console.log('RESULT', res, typeof res);
+          if (res.status !== 'No match'){
+            //TODO: fix clearTimer
+            //clearInterval(clearTimer);
+            //context.yourRoam.bind(context)();
+            console.log('FOUND A MATCH!!!!!!!!!!');
+            context.setState({
+              roam: {
+                venue: res.venueName,
+                address: res.venueAddress,
+                numRoamers: res.numRoamers,
+              }
+            });
           }
         })
         .catch((error) => {
@@ -44,7 +56,7 @@ class Confirmation extends Component {
     } 
 
     const tenMinutes = 1000 * 60 * 10;
-    const d_fetchRoam = _.debounce(fetchRoam, tenMinutes, true);
+    const d_fetchRoam = _.debounce(fetchRoam, 5000, true);
 
     navigator.geolocation.getCurrentPosition( position => {
       let time = this.props.navigator.navigationContext._currentRoute.selectedTime;
@@ -70,11 +82,10 @@ class Confirmation extends Component {
       let clearTimer = setInterval(() => {
         bounds += 0.04;
         d_fetchRoam(position, bounds, clearTimer);
-
+        console.log('searching....');
         fetchCounter++;
-        fetchCounter === time ? clearInterval(clearTimer) : null;
-      }, tenMinutes);
-      
+        fetchCounter === 100 ? clearInterval(clearTimer) : null;
+      }, 5000);
     });
   }
 
@@ -93,7 +104,7 @@ class Confirmation extends Component {
 
     this.props.navigator.pop();
 
-    fetch('https://roam-legacy.herokuapp.com/cancel', {
+    fetch('http://159.203.251.115:3000/cancel', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
@@ -113,13 +124,25 @@ class Confirmation extends Component {
   }
 
   render() {
+    var venueInfo;
+    console.log('rendering', this.state.roam);
+    if(this.state.roam.venue){
+      venueInfo = [
+        <Text key="l1" style={styles.confirmation}>{this.state.roam.venue} with {this.state.roam.numRoamers} roamers</Text>,
+        <Text key="l2" style={styles.confirmation}>{this.state.roam.address}</Text>
+      ]
+    } else {
+      venueInfo = [
+        <Text key="l1" style={styles.confirmation}>Great! We are working on finding your next Roam!</Text>,
+        <Text key="l2" style={styles.confirmation}>We will notify you the details through email.</Text>
+      ];
+    }
+
     return (
       <Image style={styles.backgroundImage}
         source={require('../../imgs/uni.jpg')}>
         <Text style={styles.title}> roam </Text>
-
-          <Text style={styles.confirmation}>Great! We are working on finding your next Roam!</Text>
-          <Text style={styles.confirmation}>We will notify you the details through email.</Text>
+          {venueInfo}
           <TouchableHighlight
             style={styles.button}
             onPress={this.handleCancel.bind(this)}

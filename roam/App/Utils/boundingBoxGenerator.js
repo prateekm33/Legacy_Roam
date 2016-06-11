@@ -11,6 +11,8 @@ module.exports = function(req) {
   */
   // const offsetToDegrees = 0.02;
   let offsetToDegrees = req.body.boundingBox;
+  console.log('offsetToDegrees', offsetToDegrees);
+
   //or user chooses mile radius
 
   var dateMS = Date.now();
@@ -22,6 +24,7 @@ module.exports = function(req) {
   var minLat = userLatitude - offsetToDegrees;
   var maxLong = userLongitude + offsetToDegrees;
   var minLong = userLongitude - offsetToDegrees;
+
 
   return ({userLatitude, userLongitude, maxLat, minLat, maxLong, minLong});
 }

@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { SegmentedControls } from 'react-native-radio-buttons';
 import Geolocation from './Geolocation';
 var Confirmation = require('./Confirmation');
+var iBeacon = require('./iBeacon');
+var History = require('./History');
 var Separator = require('./Helpers/Separator');
 var styles = require('./Helpers/styles');
 
@@ -50,7 +52,16 @@ class Time extends Component {
   }
 
   handleHistory() {
+    this.props.navigator.push({
+      title: 'History',
+      email: this.props.navigator.navigationContext._currentRoute.email,
+      component: History
+    });
     console.log('page not built yet!!!');
+  }
+
+  iBeacon() {
+    
   }
 
   render () {
@@ -105,5 +116,3 @@ class Time extends Component {
 }
 
 module.exports = Time;
-
-

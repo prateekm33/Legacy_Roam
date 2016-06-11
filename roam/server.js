@@ -41,9 +41,11 @@ app.post('/signup', function(req, res){
   console.log('HELLOOOOOOO');
 
   var data = req.body;
+  console.log('data from signup', data);
 
   //Check database to see if incoming email on signup already exists
   apoc.query('MATCH (n:User {email: "%email%"}) RETURN n', { email: data.email }).exec().then(function(queryRes) {
+    console.log(queryRes[0].data);
     //If there is no matching email in the database
     if (queryRes[0].data.length === 0) {
       //Hash password upon creation of account
@@ -55,9 +57,10 @@ app.post('/signup', function(req, res){
           if (err) {
             console.log('Error hashing password', err);
           }
+          data.email = data.email.toLowerCase();
           data.password = hash;
           //Creates new server in database
-          apoc.query('CREATE (newUser:User {firstName: "%firstName%", lastName: "%lastName%", password: "%password%", email: "%email%"});', data).exec().then(
+          apoc.query('CREATE (newUser:User {firstName: "%firstName%", lastName: "%lastName%", password: "%password%", email: "%email%", picture: "%picture%", fb: "%fb%"});', data).exec().then(
             function(dbRes){
               console.log('saved to database:', dbRes);
               res.send(JSON.stringify({message: 'User created'}));
@@ -77,9 +80,11 @@ app.post('/signup', function(req, res){
 //Validation for sign in page
 app.post('/signin', function(req, res){
   var data = req.body;
+  console.log('data from facebook signin', data);
+
   apoc.query('MATCH (n:User {email: "%email%"}) RETURN n.password', {email: data.email}).exec().then(function(queryRes){
     if(queryRes[0].data.length === 0) {
-      res.send(JSON.stringify({message: 'Incorrect email/password combination!'}));
+      res.send(JSON.stringify({message: '1.Incorrect email/password combination!'}));
     } else {
       console.log(queryRes[0].data[0].row[0]);
       bcrypt.compare(data.password, queryRes[0].data[0].row[0], function(err, bcryptRes){
@@ -89,7 +94,7 @@ app.post('/signin', function(req, res){
         if(bcryptRes){
           res.send(JSON.stringify({message: 'Password Match'}));
         } else {
-          res.send(JSON.stringify({message: 'Incorrect email/password combination!'}));
+          res.send(JSON.stringify({message: '2.Incorrect email/password combination!'}));
         }
       });
     }
@@ -98,6 +103,7 @@ app.post('/signin', function(req, res){
 
 //Page to set up event between users, making API calls to YELP
 app.post('/roam', function(req, res) {
+  console.log(JSON.stringify(req.body));
 
 	var dateMS = Date.now();
   var userEmail = req.body.userEmail;
@@ -113,7 +119,10 @@ app.post('/roam', function(req, res) {
   }
   var coords = boundingBoxGenerator(req); //bounding box coordinates
   var times = roamOffGenerator(req); //time until roam ends
+
   console.log(Roamers, 'roamers');
+  console.log('about to query db');
+
   //Checks to make sure if there is an existing pending roam within similar location by a different user
   apoc.query('MATCH (n:Roam) WHERE n.creatorRoamEnd > %currentDate% AND n.creatorLatitude < %maxLat% AND n.creatorLatitude > %minLat% AND n.creatorLongitude < %maxLong% AND n.creatorLongitude > %minLong% AND n.creatorEmail <> "%userEmail%" AND n.numRoamers < %Roamers% AND n.maxRoamers = %Roamers% RETURN n', {currentDate:dateMS, maxLat: coords.maxLat, minLat: coords.minLat, maxLong: coords.maxLong, minLong: coords.minLong, userEmail: userEmail, Roamers: Roamers, maxRoamers: Roamers}).exec().then(function(matchResults) {
     
@@ -135,7 +144,7 @@ app.post('/roam', function(req, res) {
         var venueAddress = venue.location.display_address.join(' ');
 
         //Create a roam node if it doesn't exist
-        apoc.query('CREATE (m:Roam {creatorEmail: "%userEmail%", creatorLatitude: %userLatitude%, creatorLongitude: %userLongitude%, creatorRoamStart: %startRoam%, creatorRoamEnd: %roamOffAfter%, numRoamers: 1, maxRoamers: %Roamers%, venueName: "%venueName%", venueAddress: "%venueAddress%"})', { Roamers: Roamers, email: userEmail, userEmail: userEmail, userLatitude: coords.userLatitude, userLongitude: coords.userLongitude,
+        apoc.query('CREATE (m:Roam {creatorEmail: "%userEmail%", creatorLatitude: %userLatitude%, creatorLongitude: %userLongitude%, creatorRoamStart: %startRoam%, creatorRoamEnd: %roamOffAfter%, numRoamers: 1, maxRoamers: %Roamers%, status: "Pending", venueName: "%venueName%", venueAddress: "%venueAddress%"})', { Roamers: Roamers, email: userEmail, userEmail: userEmail, userLatitude: coords.userLatitude, userLongitude: coords.userLongitude,
       startRoam: times.startRoam, roamOffAfter: times.roamOffAfter, venueName: venueName, venueAddress: venueAddress }).exec().then(function(queryRes) {
 
           // creates the relationship between creator of roam node and the roam node
@@ -145,38 +154,50 @@ app.post('/roam', function(req, res) {
         });
       });
     
-    res.send(JSON.stringify('No match currently'));
+    res.json({status: 'No match'});
 
-		} else { //Roam node found within a similar geographic location
+    } else { //Roam node found within a similar geographic location
       console.log('Found a match', matchResults[0].data[0].meta[0].id);
 
       var id = matchResults[0].data[0].meta[0].id;
 
       //Grabs roam node between similar location, and creates the relationship between node and user
-      apoc.query('MATCH (n:User {email:"%email%"}), (m:Roam) WHERE id(m) = %id% SET m.numRoamers=m.numRoamers+1 CREATE (n)-[:CREATED]->(m) RETURN m', {email:userEmail, id:id} ).exec().then(function(roamRes) {
+      apoc.query('MATCH (n:User {email:"%email%"}), (m:Roam) WHERE id(m) = %id% SET m.numRoamers=m.numRoamers+1, m.status="Active" CREATE (n)-[:CREATED]->(m) RETURN m', {email:userEmail, id:id} ).exec().then(function(roamRes) {
           console.log('Relationship created b/w Users created', roamRes[0].data[0].row[0]);
           var roamInfo = roamRes[0].data[0].row[0];
 
           var date = formattedDateHtml();
 
           //Generates an automatic email message
-	        var mailOptions = {
-	          from: '"Roam" <Roamincenterprises@gmail.com>', // sender address 
-	          bcc: roamInfo.creatorEmail + ',' + userEmail, // List of users who are matched
-	          subject: 'Your Roam is Ready!', // Subject line 
-	          text: 'Your Roam is at:' + roamInfo.venueName + ' Roam Address: ' + roamInfo.venueAddress, // plaintext body 
-	          html: generateEmail(roamInfo.venueName, roamInfo.venueAddress, date) // html body 
-	        };
-	         
-	        // send mail with defined transport object 
-	        transporter.sendMail(mailOptions, function(error, info){
-	          if(error){
+          var mailOptions = {
+            from: '"Roam" <Roamincenterprises@gmail.com>', // sender address 
+            bcc: roamInfo.creatorEmail + ',' + userEmail, // List of users who are matched
+            subject: 'Your Roam is Ready!', // Subject line 
+            text: 'Your Roam is at:' + roamInfo.venueName + ' Roam Address: ' + roamInfo.venueAddress, // plaintext body 
+            html: generateEmail(roamInfo.venueName, roamInfo.venueAddress, date) // html body 
+          };
+           
+          // send mail with defined transport object 
+          transporter.sendMail(mailOptions, function(error, info){
+            if(error){
 	            return console.log(error);
 	          }
 	          console.log('Message sent: ' + info.response);
-	        });
+          });
 
-          res.send(JSON.stringify("You have been matched!")); 
+          //If roam match has occured, when max time is reached, change status to Completed
+          (() => {
+            console.log(roamInfo);
+            //this time will be when to set the roam to completed.
+            //for now, just wait 30 seconds though
+            console.log('timeRemaining', (roamInfo.creatorRoamEnd - new Date().getTime()) / (1000*60), 'minutes');
+            setTimeout(()=>{
+              console.log('changing roam status to Completed', roamInfo.creatorEmail);
+              apoc.query('MATCH (m:Roam {creatorEmail: "%creatorEmail%"}) WHERE m.status="Active" SET m.status="Completed" RETURN m', {creatorEmail: roamInfo.creatorEmail}).exec();  
+            }, 30000);
+          })();
+
+          res.json(roamInfo); 
         })
         .catch(e => console.log('error: ', e));
     }
@@ -214,6 +235,71 @@ app.post('/cancel', function(req, res){
     });
 
     res.send("Your Roam has been canceled"); 
+  });
+});
+
+//Check for recently completed roams
+app.get('/finished', function(req, res){
+  var userEmail = req.query.email;
+  console.log('useremail is:', userEmail);
+
+  apoc.query('MATCH (n:User {email:"%email%"})-[:CREATED]->(m:Roam{status:"Completed"}) return m', {email:userEmail}).exec().then((queryRes)=> {
+    if(queryRes[0].data.length === 0){
+      res.json({
+        venue: '',
+        id: null
+      });
+    } else {
+      console.log(JSON.stringify(queryRes[0], 4, 2));
+      console.log(queryRes[0].data[0].meta[0].id);
+      res.json({
+        venue: queryRes[0].data[0].row[0].venueName,
+        id: queryRes[0].data[0].meta[0].id
+      });
+    }
+  });
+});
+
+//Save roam ratings from user
+app.post('/finished', function(req, res){
+  var userEmail = req.body.email;
+  var rating = +req.body.rating; //number coercion
+  var roamId = +req.body.roamId; //number coercion
+
+  console.log(userEmail, rating, roamId);
+
+  apoc.query('MATCH (n:User {email:"%email%"})-[r]->(m:Roam{status:"Completed"}) WHERE id(m)=%id% CREATE (n)-[:ROAMED{rated:%rating%}]->(m) DELETE r return m', {email:userEmail, id:roamId, rating:rating}).exec().then((queryRes)=>{
+    res.send('rating success');
+  });
+});
+
+//Get all completed, rated roams for user
+app.get('/history', function(req, res){
+  var userEmail = req.query.email;
+  console.log('useremail is:', userEmail);
+
+  apoc.query('MATCH (n:User {email:"%email%"})-[r:ROAMED]->(m:Roam{status:"Completed"})<--(p:User)  RETURN r,m,p', {email: userEmail}).exec().then(function(queryRes){
+    var organizedData = [];
+    queryRes[0].data.forEach((roamData)=>{
+      console.log(roamData.row[0]);
+      var newRoam = {roam: {}, people: []};
+      newRoam.roam.rating = roamData.row[0].rated;
+      newRoam.roam.location = roamData.row[1].venueName;
+      newRoam.roam.date = roamData.row[1].creatorRoamStart;
+      if(Array.isArray(roamData.row[2])){
+        roamData.row[2].forEach((person)=>{
+          console.log(person);
+          newRoam.people.push({name: person.firstName + ' ' + person.lastName});
+        });        
+      } else {
+        newRoam.people.push({name: roamData.row[2].firstName + ' ' + roamData.row[2].lastName});
+      }
+      organizedData.push(newRoam);
+    })
+    console.log(queryRes[0].data);
+    res.json(organizedData);
+  }, function(fail){
+    console.log(fail);
   });
 });
 
