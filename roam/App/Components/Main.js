@@ -67,7 +67,7 @@ class Main extends Component {
           })
         })
         .then((res) => {
-          fetch('http://localhost:3000/finished?email=' + email.toLowerCase(), {
+          fetch('http://159.203.251.115:3000/finished?email=' + email.toLowerCase(), {
             method: 'GET',
             headers: {
               'Accept': 'application/json',
