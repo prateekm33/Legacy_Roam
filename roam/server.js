@@ -154,7 +154,7 @@ app.post('/roam', function(req, res) {
         });
       });
     
-    res.send('No match currently');
+    res.json({status: 'No match'});
 
     } else { //Roam node found within a similar geographic location
       console.log('Found a match', matchResults[0].data[0].meta[0].id);
@@ -197,7 +197,7 @@ app.post('/roam', function(req, res) {
             }, 30000);
           })();
 
-          res.send("You have been matched!"); 
+          res.json(roamInfo); 
         })
         .catch(e => console.log('error: ', e));
     }
